@@ -1,26 +1,61 @@
 <?php
-session_start();
+session_start(); // Start the session
 
-if (!isset($_SESSION['submissions'])) {
-    $_SESSION['submissions'] = [];
+// Define the test_input() function
+function test_input($data) {
+  $data = trim($data);
+  $data = stripslashes($data);
+  $data = htmlspecialchars($data);
+  return $data;
 }
 
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["name"]) && isset($_POST["age"])) {
-    $name = htmlspecialchars($_POST["name"]);
-    $age = htmlspecialchars($_POST["age"]);
-    
+$nameErr = $snameErr = $genderErr = "";
+$name = $sname = $gender =  "";
 
-    $_SESSION['submissions'][] = ['name' => $name, 'age' => $age];
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+  // Check if all fields are filled
+  if (isset($_POST["name"]) && !empty($_POST["name"]) &&
+      isset($_POST["sname"]) && !empty($_POST["sname"]) &&
+      isset($_POST["gender"]) && !empty($_POST["gender"])) {
+
+    // Sanitize and store data if all fields are filled
+    $name = test_input($_POST["name"]);
+    $sname = test_input($_POST["sname"]);
+    $gender = test_input($_POST["gender"]);
+
+    // Add the data to the session array
+    if (!isset($_SESSION['submissions'])) {
+      $_SESSION['submissions'] = [];
+    }
+    $_SESSION['submissions'][] = ['name' => $name, 'sname' => $sname, 'gender' => $gender];
+
+    header("location: history.php");
+
+  } else {
+    // Set error messages if any field is empty
+   
+    if (empty($_POST["name"])) {
+      $nameErr = "Name is required";
+    }
+    if (empty($_POST["sname"])) {
+      $snameErr = "Surname is required";
+    }
+    if (empty($_POST["gender"])) {
+      $genderErr = "Gender is required";
+    } 
+  }
 }
+
 
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="css//style.css">
+    <link rel="stylesheet" href="css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=New+Amsterdam&display=swap" rel="stylesheet">
@@ -38,69 +73,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["name"]) && isset($_POS
         <br><br>
         <form id="contactForm" method="POST">
             <div class="form-group" >
-                <label for="name">Name:</label>
-                <input type="text" id="name" name="name" required>
+                <br><br>
+                <label>Name:</label>
+                <input type="text" id="name" name="name" onkeyup="showsuggest(this.value)">
+                <span class="error"><br>* <?php echo $nameErr;?></span>
             </div>
             <div class="form-group">
-                <label for="email">Age:</label>
-                <input type="text" id="email" name="age" required>
+                <label>Surname:</label>
+                <input type="text" id="sname" name="sname">
+                <span class="error"><br>* <?php echo $snameErr;?></span>
             </div>
+            Gender:
+            <input type="radio" name="gender" value="female">Female
+            <input type="radio" name="gender" value="male">Male
+            <input type="radio" name="gender" value="other">Other
+            <br>
+            <span class="error">* <?php echo $genderErr;?></span>
+            <br><br>
+         
             <button type="submit" class="btnsb">Submit</button>
         </form>
     </div>
 </div>  
 
-<button id="openPopup2">HISTORY</button>
 
-<div class="popup2" id="myPopup2">
-    <div class="popup-content2">
-        <button class="close-btn2" id="closePopup2">&times;</button>
-        <br><br><br><br>
-        <form id="searchForm" method="GET">
-            <div class="form-group2">
-                <label for="searchName">Search Name:</label>
-                <input type="text" id="searchName" name="name" placeholder="Enter name to search">
-                <button type="submit" class="btnsb2">Search</button>
-            </div>
-            
-        </form>
-        <br>
-        <div class="results">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Age</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php 
-                    if (isset($_GET['name']) && !empty($_GET['name'])) {
-                        $searchName = htmlspecialchars($_GET['name']);
-                        $found = false;
-                        if (!empty($_SESSION['submissions'])) {
-                            foreach ($_SESSION['submissions'] as $submission) {
-                                if (stripos($submission['name'], $searchName) !== false) {
-                                    echo "<tr>";
-                                    echo "<td>" . htmlspecialchars($submission['name']) . "</td>"; 
-                                    echo "<td>" . htmlspecialchars($submission['age']) . "</td>"; 
-                                    echo "</tr>";
-                                    $found = true;
-                                }
-                            }
-                        }
-                        if (!$found) {
-                            echo "<tr><td colspan='2'>No matching submissions found.</td></tr>";
-                        }
-                    } else {
-                        echo "<tr><td colspan='2'>No submissions yet.</td></tr>";
-                    }
-                    ?>
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
+
 
 
    <script src="https://kit.fontawesome.com/a7e9f794eb.js" crossorigin="anonymous"></script>
