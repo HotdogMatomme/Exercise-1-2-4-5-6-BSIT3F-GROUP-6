@@ -1,7 +1,6 @@
 <?php
-session_start(); // Start the session
+session_start(); 
 
-// Define the test_input() function
 function test_input($data) {
   $data = trim($data);
   $data = stripslashes($data);
@@ -13,17 +12,17 @@ $nameErr = $snameErr = $genderErr = "";
 $name = $sname = $gender =  "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-  // Check if all fields are filled
+
   if (isset($_POST["name"]) && !empty($_POST["name"]) &&
       isset($_POST["sname"]) && !empty($_POST["sname"]) &&
       isset($_POST["gender"]) && !empty($_POST["gender"])) {
 
-    // Sanitize and store data if all fields are filled
+  
     $name = test_input($_POST["name"]);
     $sname = test_input($_POST["sname"]);
     $gender = test_input($_POST["gender"]);
 
-    // Add the data to the session array
+
     if (!isset($_SESSION['submissions'])) {
       $_SESSION['submissions'] = [];
     }
@@ -32,7 +31,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     header("location: history.php");
 
   } else {
-    // Set error messages if any field is empty
    
     if (empty($_POST["name"])) {
       $nameErr = "Name is required";
